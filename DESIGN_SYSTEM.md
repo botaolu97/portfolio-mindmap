@@ -1,8 +1,25 @@
 # Portfolio design system
 
-Version: 0.2 — design analysis, specification, and implementation notes
+Version: 0.3 — current UI rules and original design analysis
 Reviewed: 14 September 2026
 Source: [Figma — homepage (default), node 1540:1871](https://www.figma.com/design/VdBbHsw55r7PefmZUsBnaq/portfolio?node-id=1540-1871)
+
+## Current UI rules — revised 14 September 2026
+
+These rules supersede conflicting values and behaviors in the original analysis below.
+
+- Canvas: `#181500`, edge-to-edge beneath the floating content panel. The panel retains its Figma viewport inset; there is no reserved canvas column or blank gutter. Fit-view calculations use the unobscured area while panning works underneath the panel.
+- Nodes: `#313131` with white text. Panel: `#D3D1CC`. Node hover: `#424341` 2 px outside outline.
+- Selection and keyboard focus on content nodes: 2 px orange outside outline with four square corner markers (16 px fill plus 2 px outside outline; 20 px overall). No soft halo. Default accent: `#FF2700`.
+- Borders/outlines: 2 px outside strokes, keeping layout dimensions stable. Connectors: 2 px in canvas coordinates, scaling with zoom.
+- Dot grid: React Flow viewport background, 24 world-unit spacing and 1.25 world-unit dot diameter. Both spacing and dot size scale with pan/zoom; it is not a fixed wallpaper.
+- Icons: 16 × 16 px. Collapse chevrons and count numerals are white. Copy/music icons and the updated project thumbnails are exported from the Figma reference. Google Material Symbols may supply additional icons when needed.
+- Email, LinkedIn, GitHub, Music, Writing, and Photo Gallery are nonselectable nodes. They never update the content panel, URL, or orange selection markers and are excluded from the page selector. Interactive controls retain a separate accessible keyboard focus indication, without corner markers.
+- Email and Music connect to About Me. Email copies `botao.lu@outlook.com`, shows a transient Copied! confirmation, and exposes the address if copying fails. Music is an empty, draggable component with no audio or simulated playback.
+- GitHub opens the owner's profile in another tab. LinkedIn remains static until its destination is supplied. Both can be dragged and hovered without selecting a page.
+- Writing and Photo Gallery toggle their branches from the node body or circular toggle. Their child pages remain selectable. Collapsing a branch preserves the currently selected content, including when its node becomes hidden; expanding reveals its selected state again.
+- About Me, Résumé, MathWorks, project pages, writing entries, and gallery entries remain content destinations. A GitHub placeholder Markdown file is retained but is not routed by the UI.
+- Locally edited content is preserved; these refinements do not replace the owner's About page.
 
 ## Scope and evidence
 

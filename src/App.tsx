@@ -1,9 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Background, BackgroundVariant, Handle, Position, ReactFlow, applyNodeChanges,
+  Background, BackgroundVariant, Handle, Position, ReactFlow, applyNodeChanges, getNodesBounds, getViewportForBounds,
   useReactFlow, useViewport, type Node, type NodeProps, type NodeChange, type CoordinateExtent,
 } from '@xyflow/react';
-import { pages, pageById, initialCollapsed, descendants, isHidden, expandAncestors, pageFromHash, type Page } from './graph';
+import { pages, navigationPages, pageById, initialCollapsed, descendants, isHidden, expandAncestors, pageFromHash, type Page } from './graph';
 
 type PortfolioNode = Node<{
   page: Page;
@@ -23,15 +23,37 @@ const initialId = pageFromHash(window.location.hash);
 
 function MindMapNode({ data }: NodeProps<PortfolioNode>) {
   const { page, active, collapsed, count, onSelect, onToggle } = data;
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(copyTimer.current), []);
+  const component = page.kind === 'email' || page.kind === 'music';
+  const selectable = page.selectable !== false;
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(page.email!);
+      setCopyState('copied');
+    } catch { setCopyState('error'); }
+    clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopyState('idle'), 2500);
+  };
   return (
-    <div className={`map-card ${page.kind ?? ''} ${active ? 'active' : ''}`}>
+    <div className={`map-card ${page.kind ?? ''} ${component ? 'component-card' : ''} ${selectable ? 'page-card' : 'static-card'} ${active && selectable ? 'active' : ''}`}>
       <Handle type="target" position={page.side === 'left' ? Position.Right : Position.Left} id="in" />
       <Handle type="source" position={Position.Right} id="out" />
       {page.kind === 'root' && <Handle type="source" position={Position.Left} id="left" />}
-      <button className="node-body" onClick={() => onSelect(page.id)} aria-label={`Open ${page.label}`} aria-current={active ? 'page' : undefined}>
+      {page.kind === 'email' ? <>
+        <button className="node-body" onClick={copyEmail} aria-label={`Copy email address ${page.email}`} title={page.email}>
+          <img className="component-icon" src="/icons/copy.svg" alt="" /><span>{copyState === 'copied' ? 'Copied!' : 'Email'}</span>
+        </button>
+        <span className="sr-only" role="status">{copyState === 'copied' ? 'Email address copied' : copyState === 'error' ? `Unable to copy. Email: ${page.email}` : ''}</span>
+        {copyState === 'error' && <span className="copy-error nodrag">{page.email}</span>}
+      </> : page.kind === 'music' ? <div className="node-body" aria-label="Music — no track added" title="No track added"><img className="component-icon" src="/icons/music.svg" alt="" /><span>Music</span></div> : !selectable ? (
+        page.href ? <a className="node-body" href={page.href} target="_blank" rel="noreferrer" aria-label={`Visit ${page.label} (opens in a new tab)`}>{page.label}</a> : count > 0 ? <button className="node-body" onClick={() => onToggle(page.id)} aria-expanded={!collapsed} aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${page.label} branch`}>{page.label}</button> : <div className="node-body">{page.label}</div>
+      ) : <button className="node-body" onClick={() => onSelect(page.id)} aria-label={`Open ${page.label}`} aria-current={active ? 'page' : undefined}>
         {page.thumbnail && <img className="thumbnail" src={page.thumbnail} alt="" draggable={false} />}
         <span>{page.label}</span>
-      </button>
+      </button>}
+      {selectable && <span className="selection-corners" aria-hidden="true"><i /><i /><i /><i /></span>}
       {count > 0 && <button className="branch-toggle nodrag nopan" aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${page.label}${collapsed ? `, ${count} hidden pages` : ''}`} aria-expanded={!collapsed} onClick={() => onToggle(page.id)}>
         <span className="branch-badge">{collapsed ? count : <img src="/icons/chevron.svg" alt="" />}</span>
       </button>}
@@ -65,7 +87,7 @@ export default function App() {
   const [accent, setAccent] = useState('#ff2700');
   const [accentOpen, setAccentOpen] = useState(false);
   const [ready, setReady] = useState(false);
-  const { fitView, getNode, setCenter } = useReactFlow<PortfolioNode>();
+  const { getNodes, getNode, setViewport } = useReactFlow<PortfolioNode>();
   const mapRef = useRef<HTMLDivElement>(null);
   const articleRef = useRef<HTMLElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -74,6 +96,7 @@ export default function App() {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const selectPage = useCallback((id: string) => {
+    if (!navigationPages.some((page) => page.id === id)) return;
     setCollapsed((current) => expandAncestors(id, current));
     setSelected(id);
     if (window.location.hash !== `#${id}`) window.location.hash = id;
@@ -108,7 +131,6 @@ export default function App() {
   }, [sheetOpen, compact]);
 
   const toggleBranch = useCallback((id: string) => {
-    if (!collapsed.has(id) && descendants(id).includes(selected)) selectPage(id);
     setCollapsed((current) => {
       const next = new Set(current);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -125,7 +147,7 @@ export default function App() {
     id: `${page.parent}-${page.id}`, source: page.parent!, target: page.id,
     sourceHandle: page.side === 'left' ? 'left' : 'out', targetHandle: 'in',
     hidden: isHidden(page.id, collapsed), selectable: false, deletable: false, focusable: false,
-    style: { stroke: 'var(--edge)', strokeWidth: 1.25 },
+    style: { stroke: 'var(--edge)', strokeWidth: 2 },
   })), [collapsed]);
 
   const onNodesChange = useCallback((changes: NodeChange<PortfolioNode>[]) => {
@@ -134,8 +156,14 @@ export default function App() {
   }, []);
 
   const fit = useCallback(() => {
-    void fitView({ padding: compact ? 0.12 : 0.09, minZoom, maxZoom: 1, duration: reducedMotion ? 0 : 220 });
-  }, [fitView, compact, reducedMotion]);
+    const map = mapRef.current;
+    if (!map) return;
+    const panel = document.querySelector<HTMLElement>('.content-panel:not(.mobile-sheet)');
+    const width = compact ? map.clientWidth : (panel?.offsetLeft ?? map.clientWidth) - 24;
+    const bounds = getNodesBounds(getNodes().filter((node) => !node.hidden));
+    const viewport = getViewportForBounds(bounds, Math.max(width, 240), map.clientHeight, minZoom, 1, 0.12);
+    void setViewport(viewport, { duration: reducedMotion ? 0 : 220 });
+  }, [getNodes, setViewport, compact, reducedMotion]);
 
   useEffect(() => {
     if (!ready || !mapRef.current) return;
@@ -151,7 +179,12 @@ export default function App() {
   const navigateFromPanel = (id: string) => {
     selectPage(id);
     const node = getNode(id);
-    if (node) void setCenter(node.position.x + (node.measured?.width ?? 162) / 2, node.position.y + (node.measured?.height ?? 75) / 2, { zoom: compact ? 0.75 : 0.9, duration: reducedMotion ? 0 : 220 });
+    if (node && mapRef.current) {
+      const panel = document.querySelector<HTMLElement>('.content-panel:not(.mobile-sheet)');
+      const width = compact ? mapRef.current.clientWidth : (panel?.offsetLeft ?? mapRef.current.clientWidth) - 24;
+      const zoom = compact ? 0.75 : 0.9;
+      void setViewport({ x: width / 2 - (node.position.x + (node.measured?.width ?? 162) / 2) * zoom, y: mapRef.current.clientHeight / 2 - (node.position.y + (node.measured?.height ?? 75) / 2) * zoom, zoom }, { duration: reducedMotion ? 0 : 220 });
+    }
   };
 
   const content = contentFiles[`../content/${selected}.md`] ?? `# ${selectedPage.title}\n`;
@@ -161,7 +194,7 @@ export default function App() {
       <label className="page-selector">
         <span className="sr-only">Choose a page</span>
         <select value={selected} onChange={(event) => navigateFromPanel(event.target.value)}>
-          {pages.map((page) => <option key={page.id} value={page.id}>{page.parent && page.parent !== 'about' ? '　' : ''}{page.label}</option>)}
+          {navigationPages.map((page) => <option key={page.id} value={page.id}>{page.parent && page.parent !== 'about' ? '　' : ''}{page.label}</option>)}
         </select>
         <img src="/icons/chevron.svg" alt="" />
       </label>
@@ -178,14 +211,14 @@ export default function App() {
     <section className="map-region" ref={mapRef} aria-label="Portfolio mind map">
       <ReactFlow<PortfolioNode>
         nodes={visibleNodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange}
-        onInit={() => setReady(true)} fitView fitViewOptions={{ padding: 0.09, maxZoom: 1 }}
+        onInit={() => setReady(true)}
         minZoom={minZoom} maxZoom={maxZoom} nodeExtent={extent} translateExtent={extent}
         nodesConnectable={false} edgesReconnectable={false} deleteKeyCode={null}
         elementsSelectable={false} nodesFocusable={false} edgesFocusable={false}
         selectionOnDrag={false} selectNodesOnDrag={false} nodeDragThreshold={5}
         noDragClassName="nodrag" zoomOnDoubleClick={false} panOnDrag
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#454545" />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1.25} color="#555650" />
       </ReactFlow>
     </section>
     <div className="accent-area">

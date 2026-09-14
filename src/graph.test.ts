@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { pages, descendants, expandAncestors, initialCollapsed, isHidden, pageFromHash } from './graph.ts';
+import { pages, navigationPages, descendants, expandAncestors, initialCollapsed, isHidden, pageFromHash } from './graph.ts';
 
 test('collapsing branches hides their descendants without hiding the parent', () => {
   const collapsed = new Set(['mathworks']);
@@ -20,10 +20,15 @@ test('selecting a hidden page expands its ancestors while preserving other colla
   assert.equal(collapsed.has('about'), true);
 });
 
-test('root collapse hides every other node; valid hashes resolve and invalid hashes fall back', () => {
+test('root collapse hides every child; hashes only resolve content pages', () => {
   assert.equal(descendants('about').length, pages.length - 1);
-  assert.equal(pages.filter((page) => !isHidden(page.id, new Set(['about']))).length, 1);
+  assert.deepEqual(pages.filter((page) => !isHidden(page.id, new Set(['about']))).map((page) => page.id), ['about']);
   assert.equal(pageFromHash('#matlab-grid'), 'matlab-grid');
   assert.equal(pageFromHash('#unknown'), 'about');
   assert.equal(pageFromHash(''), 'about');
+  for (const id of ['email', 'music', 'linkedin', 'github', 'writing', 'gallery']) {
+    assert.equal(pageFromHash(`#${id}`), 'about');
+    assert.equal(navigationPages.some((page) => page.id === id), false);
+  }
+  assert.equal(navigationPages.some((page) => page.kind === 'email' || page.kind === 'music'), false);
 });
