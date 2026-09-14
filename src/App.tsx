@@ -43,11 +43,11 @@ function MindMapNode({ data }: NodeProps<PortfolioNode>) {
       {page.kind === 'root' && <><Handle type="source" position={Position.Left} id="left" /><Handle type="source" position={Position.Bottom} id="bottom" /></>}
       {page.kind === 'email' ? <>
         <button className="node-body" onClick={copyEmail} aria-label={`Copy email address ${page.email}`} title={page.email}>
-          <img className="component-icon" src="/icons/copy.svg" alt="" /><span>{copyState === 'copied' ? 'Copied!' : 'Email'}</span>
+          <img className="component-icon" src={import.meta.env.BASE_URL + "icons/copy.svg"} alt="" /><span>{copyState === 'copied' ? 'Copied!' : 'Email'}</span>
         </button>
         <span className="sr-only" role="status">{copyState === 'copied' ? 'Email address copied' : copyState === 'error' ? `Unable to copy. Email: ${page.email}` : ''}</span>
         {copyState === 'error' && <span className="copy-error nodrag">{page.email}</span>}
-      </> : page.kind === 'music' ? <div className="node-body" aria-label="Music — no track added" title="No track added"><img className="component-icon" src="/icons/music.svg" alt="" /><span>Music</span></div> : !selectable ? (
+      </> : page.kind === 'music' ? <div className="node-body" aria-label="Music — no track added" title="No track added"><img className="component-icon" src={import.meta.env.BASE_URL + "icons/music.svg"} alt="" /><span>Music</span></div> : !selectable ? (
         page.href ? <a className="node-body" href={page.href} target="_blank" rel="noreferrer" aria-label={`Visit ${page.label} (opens in a new tab)`}>{page.label}</a> : <div className="node-body">{page.label}</div>
       ) : <button className="node-body" onClick={() => onSelect(page.id)} aria-label={`Open ${page.label}`} aria-current={active ? 'page' : undefined}>
         {page.id === 'ai-workflow' ? <WaveformLogo /> : page.id === 'matlab-grid' ? <ScaleLogo /> : page.id === 'icon-language' ? <SystemLogo /> : page.thumbnail && <img className="thumbnail" src={page.thumbnail} alt="" draggable={false} />}
@@ -64,7 +64,7 @@ function CanvasControls({ onFit }: { onFit: () => void }) {
   const { zoomIn, zoomOut } = useReactFlow();
   const { zoom } = useViewport();
   return <div className="canvas-controls" aria-label="Canvas controls">
-    <button className="canvas-button" onClick={onFit} aria-label="Fit map to view" title="Fit map to view"><img src="/icons/fit-view.svg" alt="" /></button>
+    <button className="canvas-button" onClick={onFit} aria-label="Fit map to view" title="Fit map to view"><img src={import.meta.env.BASE_URL + "icons/fit-view.svg"} alt="" /></button>
     <button className="canvas-button zoom-symbol" onClick={() => zoomIn()} disabled={zoom >= maxZoom - 0.01} aria-label="Zoom in" title="Zoom in">+</button>
     <button className="canvas-button zoom-symbol" onClick={() => zoomOut()} disabled={zoom <= minZoom + 0.01} aria-label="Zoom out" title="Zoom out">−</button>
     <output className="zoom-value" aria-label="Zoom level">{Math.round(zoom * 100)}%</output>
@@ -182,7 +182,7 @@ export default function App() {
         <select value={selected} onChange={(event) => navigateFromPanel(event.target.value)}>
           {navigationPages.map((page) => <option key={page.id} value={page.id}>{page.parent && page.parent !== 'about' ? '　' : ''}{page.label}</option>)}
         </select>
-        <img src="/icons/chevron.svg" alt="" />
+        <img src={import.meta.env.BASE_URL + "icons/chevron.svg"} alt="" />
       </label>
       {compact && <button className="close-sheet" onClick={closeSheet} aria-label="Close page and return to map">×</button>}
     </div>

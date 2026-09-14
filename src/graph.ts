@@ -20,9 +20,9 @@ export const pages: Page[] = [
   { id: 'email', label: 'Email', title: 'Email', selectable: false, parent: 'about', kind: 'email', email: 'botao.lu@outlook.com', side: 'left', position: { x: 10, y: 540 } },
   { id: 'music', label: 'Music', title: 'Music', selectable: false, parent: 'about', kind: 'music', position: { x: 280, y: 540 } },
   { id: 'mathworks', label: 'Work @MathWorks', title: 'Work at MathWorks', parent: 'about', position: { x: 535, y: 270 } },
-  { id: 'ai-workflow', label: 'From Code to AI Workflow', title: 'From Code to AI Workflow', parent: 'mathworks', kind: 'project', thumbnail: '/images/project-preview.png', position: { x: 800, y: 140 } },
-  { id: 'matlab-grid', label: 'Rethinking the MATLAB grid', title: 'Rethinking the MATLAB grid', parent: 'mathworks', kind: 'project', thumbnail: '/images/matlab-grid.png', position: { x: 800, y: 270 } },
-  { id: 'icon-language', label: '4,500 Icons, One Design Language', title: '4,500 Icons, One Design Language', parent: 'mathworks', kind: 'project', thumbnail: '/images/icon-language.png', position: { x: 800, y: 400 } },
+  { id: 'ai-workflow', label: 'From Code to AI Workflow', title: 'From Code to AI Workflow', parent: 'mathworks', kind: 'project', thumbnail: './images/project-preview.png', position: { x: 800, y: 140 } },
+  { id: 'matlab-grid', label: 'Rethinking the MATLAB grid', title: 'Rethinking the MATLAB grid', parent: 'mathworks', kind: 'project', thumbnail: './images/matlab-grid.png', position: { x: 800, y: 270 } },
+  { id: 'icon-language', label: '4,500 Icons, One Design Language', title: '4,500 Icons, One Design Language', parent: 'mathworks', kind: 'project', thumbnail: './images/icon-language.png', position: { x: 800, y: 400 } },
   { id: 'writing', label: 'How I create this page?', title: 'How I create this page?', parent: 'about', position: { x: 535, y: 510 } },
   { id: 'gallery', label: 'Photo Gallery', title: 'Photo Gallery', parent: 'about', position: { x: 535, y: 660 } },
 ];
