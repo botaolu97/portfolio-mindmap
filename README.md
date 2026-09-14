@@ -26,3 +26,5 @@ Drag nodes or the background to explore. Zoom with the wheel, pinch, or controls
 ## Git
 
 The implementation branch is `codex/portfolio-shell`. Commit source changes and `package-lock.json`; dependencies and generated builds are ignored.
+
+The first project logo is animated with plain SVG and CSS (`src/WaveformLogo.tsx`). Hover or keyboard-focus its card to scan the waveform; leave to reverse it. It follows the accent color and respects reduced motion. No Framer dependency is required.

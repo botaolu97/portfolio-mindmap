@@ -264,3 +264,7 @@ These do not block this specification: whether the Accent control is interactive
 - The floating panel becomes a native modal reading sheet below 768 px. Desktop has a keyboard-accessible “Read selected content” shortcut; all destinations are also available in the panel selector.
 - Thumbnail and matching interface icons are the original exported Figma assets, saved locally. Panel images and biography are intentionally omitted under the title-only requirement.
 - Visit-specific node positions and collapse state remain in memory. URL fragments retain selected-page navigation and browser history.
+
+## First project logo interaction
+
+The AI Workflow node uses `src/WaveformLogo.tsx`, adapted from the owner's Framer animation. The original waveform geometry, scanner endpoints (8 to 86), reveal travel (77 units), and cubic-bezier easing are preserved. A 500 ms CSS transition replaces Framer Motion and reverses smoothly on pointer leave or keyboard blur. Hovering or keyboard-focusing the whole project button triggers the scan; merely selecting a page does not run a loop. A unique SVG mask makes the background transparent over both card fills. The accent uses the shared CSS token. Reduced-motion users see the static starting frame. The other two project logos remain static pending their animation designs.

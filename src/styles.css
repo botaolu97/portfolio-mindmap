@@ -48,6 +48,16 @@ button:focus-visible, select:focus-visible { outline: 2px solid currentColor; ou
 .root .node-body { font-size: 16px; font-weight: 400; }
 .project .node-body { text-align: left; justify-content: flex-start; }
 .thumbnail { width: 72px; height: 58px; object-fit: cover; flex-shrink: 0; user-select: none; }
+.waveform-logo { overflow: hidden; pointer-events: none; }
+.waveform-fill, .waveform-scanner { transition: transform 500ms cubic-bezier(.65, 0, .35, 1); }
+.waveform-fill { transform: translateX(0); }
+.waveform-scanner { transform: translateX(8px); }
+.node-body:hover .waveform-fill, .node-body:focus-visible .waveform-fill { transform: translateX(77px); }
+.node-body:hover .waveform-scanner, .node-body:focus-visible .waveform-scanner { transform: translateX(86px); }
+@media (prefers-reduced-motion: reduce) {
+  .node-body:hover .waveform-fill, .node-body:focus-visible .waveform-fill { transform: translateX(0); }
+  .node-body:hover .waveform-scanner, .node-body:focus-visible .waveform-scanner { transform: translateX(8px); }
+}
 .accent-area { position: absolute; top: var(--inset); left: var(--inset); z-index: 5; }
 .accent-control { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 43px; border: 0; outline: 1px solid #24221a; outline-offset: 0; border-radius: 4px; background: var(--canvas); color: #858585; font-size: 14px; }
 .accent-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 0; }
