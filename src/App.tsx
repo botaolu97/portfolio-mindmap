@@ -5,6 +5,8 @@ import {
 } from '@xyflow/react';
 import { pages, navigationPages, pageById, pageFromHash, type Page } from './graph';
 import WaveformLogo from './WaveformLogo';
+import ScaleLogo from './ScaleLogo';
+import SystemLogo from './SystemLogo';
 
 type PortfolioNode = Node<{
   page: Page;
@@ -48,7 +50,7 @@ function MindMapNode({ data }: NodeProps<PortfolioNode>) {
       </> : page.kind === 'music' ? <div className="node-body" aria-label="Music — no track added" title="No track added"><img className="component-icon" src="/icons/music.svg" alt="" /><span>Music</span></div> : !selectable ? (
         page.href ? <a className="node-body" href={page.href} target="_blank" rel="noreferrer" aria-label={`Visit ${page.label} (opens in a new tab)`}>{page.label}</a> : <div className="node-body">{page.label}</div>
       ) : <button className="node-body" onClick={() => onSelect(page.id)} aria-label={`Open ${page.label}`} aria-current={active ? 'page' : undefined}>
-        {page.id === 'ai-workflow' ? <WaveformLogo /> : page.thumbnail && <img className="thumbnail" src={page.thumbnail} alt="" draggable={false} />}
+        {page.id === 'ai-workflow' ? <WaveformLogo /> : page.id === 'matlab-grid' ? <ScaleLogo /> : page.id === 'icon-language' ? <SystemLogo /> : page.thumbnail && <img className="thumbnail" src={page.thumbnail} alt="" draggable={false} />}
         <span>{page.label}</span>
       </button>}
 

@@ -267,4 +267,10 @@ These do not block this specification: whether the Accent control is interactive
 
 ## First project logo interaction
 
-The AI Workflow node uses `src/WaveformLogo.tsx`, adapted from the owner's Framer animation. The original waveform geometry, scanner endpoints (8 to 86), reveal travel (77 units), and cubic-bezier easing are preserved. A 500 ms CSS transition replaces Framer Motion and reverses smoothly on pointer leave or keyboard blur. Hovering or keyboard-focusing the whole project button triggers the scan; merely selecting a page does not run a loop. A unique SVG mask makes the background transparent over both card fills. The accent uses the shared CSS token. Reduced-motion users see the static starting frame. The other two project logos remain static pending their animation designs.
+The AI Workflow node uses `src/WaveformLogo.tsx`, adapted from the owner's Framer animation. The original waveform geometry, scanner endpoints (8 to 86), reveal travel (77 units), and cubic-bezier easing are preserved. A 500 ms CSS transition replaces Framer Motion and reverses smoothly on pointer leave or keyboard blur. Hovering or keyboard-focusing the whole project button triggers the scan; merely selecting a page does not run a loop. A unique SVG mask makes the background transparent over both card fills. The accent uses the shared CSS token. Reduced-motion users see the static starting frame. The second and third logos are now animated as described below.
+
+## Second and third project logo interactions
+
+- `ScaleLogo.tsx` adapts the supplied interface-scale geometry: three overlapping frames, three indicators, and six changing line lengths. CSS transitions interpolate the supplied endpoints over 400 ms with cubic-bezier(.5, 0, .5, 1). Frame fills match the card surface on hover.
+- `SystemLogo.tsx` preserves the supplied polar diagram geometry, piecewise ring rotation, elliptical marker path, and easing functions. A small requestAnimationFrame loop updates only SVG attributes, with a 500 ms full traversal and distance-scaled reversal. The loop stops at rest and is cancelled on unmount.
+- Both activate on whole-card hover or keyboard focus, reverse on leave/blur, use the shared accent, and remain static with reduced motion. Neither needs Framer runtime or property controls.

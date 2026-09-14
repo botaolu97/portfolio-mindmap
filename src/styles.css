@@ -49,6 +49,21 @@ button:focus-visible, select:focus-visible { outline: 2px solid currentColor; ou
 .project .node-body { text-align: left; justify-content: flex-start; }
 .thumbnail { width: 72px; height: 58px; object-fit: cover; flex-shrink: 0; user-select: none; }
 .waveform-logo { overflow: hidden; pointer-events: none; }
+.scale-logo { overflow: hidden; pointer-events: none; }
+.system-logo { overflow: hidden; pointer-events: none; }
+.scale-shape {
+  x: var(--x-start); y: var(--y-start); width: var(--width-start); height: var(--height-start);
+  transition: x 400ms cubic-bezier(.5,0,.5,1), y 400ms cubic-bezier(.5,0,.5,1), width 400ms cubic-bezier(.5,0,.5,1), height 400ms cubic-bezier(.5,0,.5,1), fill 120ms ease-out;
+}
+.scale-frame { fill: var(--node); }
+.node-body:hover .scale-frame { fill: #3b3b3b; }
+.scale-dots { transform: translate(60px, 47px); transition: transform 400ms cubic-bezier(.5,0,.5,1); }
+@media (prefers-reduced-motion: no-preference) {
+  .node-body:hover .scale-shape, .node-body:focus-visible .scale-shape {
+    x: var(--x-end); y: var(--y-end); width: var(--width-end); height: var(--height-end);
+  }
+  .node-body:hover .scale-dots, .node-body:focus-visible .scale-dots { transform: translate(49px, 47px); }
+}
 .waveform-fill, .waveform-scanner { transition: transform 500ms cubic-bezier(.65, 0, .35, 1); }
 .waveform-fill { transform: translateX(0); }
 .waveform-scanner { transform: translateX(8px); }

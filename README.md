@@ -28,3 +28,5 @@ Drag nodes or the background to explore. Zoom with the wheel, pinch, or controls
 The implementation branch is `codex/portfolio-shell`. Commit source changes and `package-lock.json`; dependencies and generated builds are ignored.
 
 The first project logo is animated with plain SVG and CSS (`src/WaveformLogo.tsx`). Hover or keyboard-focus its card to scan the waveform; leave to reverse it. It follows the accent color and respects reduced motion. No Framer dependency is required.
+
+All three project logos are now live SVG components. `ScaleLogo.tsx` morphs the second logo with CSS; `SystemLogo.tsx` animates the third logo's original orbit and rotation tracks with a small requestAnimationFrame loop. Both use whole-card hover/keyboard focus, reverse on leave, and respect reduced motion.
