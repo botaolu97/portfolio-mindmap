@@ -1,12 +1,12 @@
 # Portfolio design system
 
-Version: 0.1 — design analysis and proposed implementation specification
+Version: 0.2 — design analysis, specification, and implementation notes
 Reviewed: 14 September 2026
 Source: [Figma — homepage (default), node 1540:1871](https://www.figma.com/design/VdBbHsw55r7PefmZUsBnaq/portfolio?node-id=1540-1871)
 
 ## Scope and evidence
 
-This document covers the linked desktop frame, its extracted design context, screenshot, and returned variables. It does not claim to audit every page or component in the Figma file. No website code or Figma changes have been made.
+This document covers the linked desktop frame, its extracted design context, screenshot, and returned variables. It does not claim to audit every page or component in the Figma file. The initial analysis preceded implementation; the local website shell now follows it. The Figma file has not been changed.
 
 - **Observed** means present in the linked frame or returned design properties.
 - **Proposed** means a recommended rule that fills a gap or resolves an implementation issue. These values are not existing Figma tokens.
@@ -240,3 +240,14 @@ Start with Markdown plus front-matter parsing. Add MDX only if the writing needs
 ## Remaining design choices
 
 These do not block this specification: whether the Accent control is interactive; actual Writing/Gallery content; preferred project-detail compositions; and whether visitor positions should persist across visits. Keep the documented defaults until these choices are refined.
+
+## Initial implementation — 14 September 2026
+
+- Implemented React + Vite + React Flow, plain CSS tokens, locally bundled Inclusive Sans, and Markdown rendering. No server, CMS, router, or UI component framework was added.
+- Per the latest request, all 21 destinations contain only placeholder headings. Writing and Gallery include 4 and 8 mock child destinations to exercise the authored counts. LinkedIn remains a local placeholder until a real destination is supplied.
+- Markdown uses a single H1 for its title, with no front-matter parser needed at this stage. Navigation metadata lives in `src/graph.ts`.
+- Accent switches between orange, blue, and lime for the current visit. Default selection remains orange.
+- The bounded world uses x=-1300…2700 and y=-800…2200, with zoom 0.25–1.8 so the complete graph can fit in narrow viewports. Node labels and controls can be enlarged with zoom.
+- The floating panel becomes a native modal reading sheet below 768 px. Desktop has a keyboard-accessible “Read selected content” shortcut; all destinations are also available in the panel selector.
+- Thumbnail and matching interface icons are the original exported Figma assets, saved locally. Panel images and biography are intentionally omitted under the title-only requirement.
+- Visit-specific node positions and collapse state remain in memory. URL fragments retain selected-page navigation and browser history.
