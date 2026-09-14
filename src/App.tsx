@@ -3,15 +3,12 @@ import {
   Background, BackgroundVariant, Handle, Position, ReactFlow, applyNodeChanges, getNodesBounds, getViewportForBounds,
   useReactFlow, useViewport, type Node, type NodeProps, type NodeChange, type CoordinateExtent,
 } from '@xyflow/react';
-import { pages, navigationPages, pageById, initialCollapsed, descendants, isHidden, expandAncestors, pageFromHash, type Page } from './graph';
+import { pages, navigationPages, pageById, pageFromHash, type Page } from './graph';
 
 type PortfolioNode = Node<{
   page: Page;
   active: boolean;
-  collapsed: boolean;
-  count: number;
   onSelect: (id: string) => void;
-  onToggle: (id: string) => void;
 }, 'portfolio'>;
 
 const contentFiles = import.meta.glob('../content/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -22,7 +19,7 @@ const maxZoom = 1.8;
 const initialId = pageFromHash(window.location.hash);
 
 function MindMapNode({ data }: NodeProps<PortfolioNode>) {
-  const { page, active, collapsed, count, onSelect, onToggle } = data;
+  const { page, active, onSelect } = data;
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(copyTimer.current), []);
@@ -38,9 +35,9 @@ function MindMapNode({ data }: NodeProps<PortfolioNode>) {
   };
   return (
     <div className={`map-card ${page.kind ?? ''} ${component ? 'component-card' : ''} ${selectable ? 'page-card' : 'static-card'} ${active && selectable ? 'active' : ''}`}>
-      <Handle type="target" position={page.side === 'left' ? Position.Right : Position.Left} id="in" />
+      <Handle type="target" position={page.kind === 'music' ? Position.Top : page.side === 'left' ? Position.Right : Position.Left} id="in" />
       <Handle type="source" position={Position.Right} id="out" />
-      {page.kind === 'root' && <Handle type="source" position={Position.Left} id="left" />}
+      {page.kind === 'root' && <><Handle type="source" position={Position.Left} id="left" /><Handle type="source" position={Position.Bottom} id="bottom" /></>}
       {page.kind === 'email' ? <>
         <button className="node-body" onClick={copyEmail} aria-label={`Copy email address ${page.email}`} title={page.email}>
           <img className="component-icon" src="/icons/copy.svg" alt="" /><span>{copyState === 'copied' ? 'Copied!' : 'Email'}</span>
@@ -48,15 +45,12 @@ function MindMapNode({ data }: NodeProps<PortfolioNode>) {
         <span className="sr-only" role="status">{copyState === 'copied' ? 'Email address copied' : copyState === 'error' ? `Unable to copy. Email: ${page.email}` : ''}</span>
         {copyState === 'error' && <span className="copy-error nodrag">{page.email}</span>}
       </> : page.kind === 'music' ? <div className="node-body" aria-label="Music — no track added" title="No track added"><img className="component-icon" src="/icons/music.svg" alt="" /><span>Music</span></div> : !selectable ? (
-        page.href ? <a className="node-body" href={page.href} target="_blank" rel="noreferrer" aria-label={`Visit ${page.label} (opens in a new tab)`}>{page.label}</a> : count > 0 ? <button className="node-body" onClick={() => onToggle(page.id)} aria-expanded={!collapsed} aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${page.label} branch`}>{page.label}</button> : <div className="node-body">{page.label}</div>
+        page.href ? <a className="node-body" href={page.href} target="_blank" rel="noreferrer" aria-label={`Visit ${page.label} (opens in a new tab)`}>{page.label}</a> : <div className="node-body">{page.label}</div>
       ) : <button className="node-body" onClick={() => onSelect(page.id)} aria-label={`Open ${page.label}`} aria-current={active ? 'page' : undefined}>
         {page.thumbnail && <img className="thumbnail" src={page.thumbnail} alt="" draggable={false} />}
         <span>{page.label}</span>
       </button>}
-      {selectable && <span className="selection-corners" aria-hidden="true"><i /><i /><i /><i /></span>}
-      {count > 0 && <button className="branch-toggle nodrag nopan" aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${page.label}${collapsed ? `, ${count} hidden pages` : ''}`} aria-expanded={!collapsed} onClick={() => onToggle(page.id)}>
-        <span className="branch-badge">{collapsed ? count : <img src="/icons/chevron.svg" alt="" />}</span>
-      </button>}
+
     </div>
   );
 }
@@ -76,11 +70,10 @@ function CanvasControls({ onFit }: { onFit: () => void }) {
 
 export default function App() {
   const [selected, setSelected] = useState(initialId);
-  const [collapsed, setCollapsed] = useState(() => expandAncestors(initialId, initialCollapsed));
   const [nodes, setNodes] = useState<PortfolioNode[]>(() => pages.map((page) => ({
     id: page.id, type: 'portfolio', position: page.position,
     deletable: false, connectable: false,
-    data: { page, active: false, collapsed: false, count: descendants(page.id).length, onSelect: () => {}, onToggle: () => {} },
+    data: { page, active: false, onSelect: () => {} },
   })));
   const [sheetOpen, setSheetOpen] = useState(false);
   const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 767px)').matches);
@@ -97,7 +90,6 @@ export default function App() {
 
   const selectPage = useCallback((id: string) => {
     if (!navigationPages.some((page) => page.id === id)) return;
-    setCollapsed((current) => expandAncestors(id, current));
     setSelected(id);
     if (window.location.hash !== `#${id}`) window.location.hash = id;
   }, []);
@@ -105,8 +97,7 @@ export default function App() {
   useEffect(() => {
     const update = () => {
       const id = pageFromHash(window.location.hash);
-      setCollapsed((current) => expandAncestors(id, current));
-      setSelected(id);
+        setSelected(id);
     };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
@@ -130,25 +121,17 @@ export default function App() {
     else if (dialog?.open) dialog.close();
   }, [sheetOpen, compact]);
 
-  const toggleBranch = useCallback((id: string) => {
-    setCollapsed((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }, [collapsed, selected, selectPage]);
-
   const visibleNodes = useMemo(() => nodes.map((node) => ({
-    ...node, hidden: isHidden(node.id, collapsed),
-    data: { ...node.data, active: selected === node.id, collapsed: collapsed.has(node.id), onSelect: selectPage, onToggle: toggleBranch },
-  })), [nodes, collapsed, selected, selectPage, toggleBranch]);
+    ...node,
+    data: { ...node.data, active: selected === node.id, onSelect: selectPage },
+  })), [nodes, selected, selectPage]);
 
   const edges = useMemo(() => pages.filter((page) => page.parent).map((page) => ({
     id: `${page.parent}-${page.id}`, source: page.parent!, target: page.id,
-    sourceHandle: page.side === 'left' ? 'left' : 'out', targetHandle: 'in',
-    hidden: isHidden(page.id, collapsed), selectable: false, deletable: false, focusable: false,
+    sourceHandle: page.kind === 'music' ? 'bottom' : page.side === 'left' ? 'left' : 'out', targetHandle: 'in',
+    selectable: false, deletable: false, focusable: false,
     style: { stroke: 'var(--edge)', strokeWidth: 2 },
-  })), [collapsed]);
+  })), []);
 
   const onNodesChange = useCallback((changes: NodeChange<PortfolioNode>[]) => {
     // Visitors can move nodes; the authored graph cannot be deleted or replaced.

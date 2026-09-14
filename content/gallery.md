@@ -1,1 +1,1 @@
-# Gallery
+# Photo Gallery

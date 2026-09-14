@@ -1,34 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { pages, navigationPages, descendants, expandAncestors, initialCollapsed, isHidden, pageFromHash } from './graph.ts';
+import { pages, navigationPages, pageFromHash } from './graph.ts';
 
-test('collapsing branches hides their descendants without hiding the parent', () => {
-  const collapsed = new Set(['mathworks']);
-  assert.equal(isHidden('mathworks', collapsed), false);
-  for (const id of ['ai-workflow', 'matlab-grid', 'icon-language']) assert.equal(isHidden(id, collapsed), true);
-  assert.equal(isHidden('resume', collapsed), false);
-  assert.equal(descendants('mathworks').length, 3);
-  assert.equal(descendants('writing').length, 4);
-  assert.equal(descendants('gallery').length, 8);
+test('writing and photography are content destinations without child nodes', () => {
+  for (const id of ['writing', 'gallery']) {
+    assert.equal(pageFromHash(`#${id}`), id);
+    assert.equal(pages.some((page) => page.parent === id), false);
+  }
 });
-
-test('selecting a hidden page expands its ancestors while preserving other collapsed branches', () => {
-  const collapsed = new Set(['about', ...initialCollapsed]);
-  const next = expandAncestors('writing-3', collapsed);
-  assert.equal(isHidden('writing-3', next), false);
-  assert.equal(next.has('gallery'), true);
-  assert.equal(collapsed.has('about'), true);
-});
-
-test('root collapse hides every child; hashes only resolve content pages', () => {
-  assert.equal(descendants('about').length, pages.length - 1);
-  assert.deepEqual(pages.filter((page) => !isHidden(page.id, new Set(['about']))).map((page) => page.id), ['about']);
-  assert.equal(pageFromHash('#matlab-grid'), 'matlab-grid');
-  assert.equal(pageFromHash('#unknown'), 'about');
-  assert.equal(pageFromHash(''), 'about');
-  for (const id of ['email', 'music', 'linkedin', 'github', 'writing', 'gallery']) {
+test('external links and components do not route to content', () => {
+  for (const id of ['resume', 'linkedin', 'email', 'music']) {
     assert.equal(pageFromHash(`#${id}`), 'about');
     assert.equal(navigationPages.some((page) => page.id === id), false);
   }
-  assert.equal(navigationPages.some((page) => page.kind === 'email' || page.kind === 'music'), false);
+  assert.equal(pageFromHash('#icon-language'), 'icon-language');
+});
+test('component connections and parent references are valid', () => {
+  for (const id of ['email', 'music']) assert.equal(pages.find((page) => page.id === id)?.parent, 'about');
+  for (const page of pages) if (page.parent) assert.ok(pages.some((parent) => parent.id === page.parent));
 });

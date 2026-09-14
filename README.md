@@ -1,44 +1,28 @@
 # Botao Lu — mind-map portfolio
 
-A local-first static portfolio built with React, TypeScript, Vite, React Flow, and plain CSS. The visual direction comes from the [Figma design](https://www.figma.com/design/VdBbHsw55r7PefmZUsBnaq/portfolio?node-id=1540-1871) and `DESIGN_SYSTEM.md`.
+React, TypeScript, Vite, React Flow, Markdown, and plain CSS. The latest UI rules are at the top of `DESIGN_SYSTEM.md`.
 
-## Run locally
+## Local development
 
-Use Node.js 22.18+ (or a newer supported LTS) and npm.
+Use Node.js 22.18+ or a newer supported LTS.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the localhost address printed by Vite. Build with `npm run build`; inspect the production build with `npm run preview`. Run graph behavior checks with `npm test`.
+Open the localhost URL printed by Vite. `npm run build` checks TypeScript and creates a static build; `npm run preview` serves that build. `npm test` checks navigation and graph relationships.
 
-## Edit content
+## Content and design
 
-Every content destination has a matching file in `content/`. The initial files contain mockup headings; edit them locally to add your content. Edit a file to add Markdown paragraphs, links, headings, and images. Vite refreshes the local preview when you save. Content is bundled at build time; there is no backend or CMS.
+Edit Markdown files in `content/`; their filenames match the content node IDs in `src/graph.ts`. The development preview updates when files are saved. Put images in `public/images/` and reference them as `![Description](/images/example.jpg)`. Shared styling is in `src/styles.css`.
 
-Add images to `public/images/` and reference them with `![Description](/images/file-name.jpg)`. Shared Markdown styling lives in `src/styles.css`.
+About Me, MathWorks, three projects, “How I create this page?” (`writing.md`), and Photo Gallery (`gallery.md`) open content in the floating panel. Writing and Photo Gallery have no child nodes or collapse controls. Earlier placeholder files remain on disk but are not used in navigation.
 
-Node labels, hierarchy, starting positions, and thumbnail paths live in `src/graph.ts`. The content filename matches the node ID, for example `content/matlab-grid.md`. When adding a page, add its record and corresponding Markdown file. The selector, connections, and collapse counts follow that data automatically.
+Resume and LinkedIn open the destinations supplied in Figma. Email copies the address configured in `src/graph.ts`. Music is an empty component; no audio is loaded. External links and components do not change the selected page. GitHub is no longer shown in the map.
 
-## Interactions
+Drag nodes or the background to explore. Zoom with the wheel, pinch, or controls; fit view frames the graph in the area clear of the panel. The dotted canvas continues beneath the panel and scales with zoom. Nodes and edges cannot be deleted or reconnected. On narrow screens, Read opens the selected content in a sheet.
 
-- Click a node to select its page. Drag nodes or the background to explore.
-- Use a category's corner button to collapse/expand it. Counts show hidden descendants.
-- Zoom with the wheel/pinch or the +/− buttons; fit view frames visible nodes without resetting positions.
-- Select any page from the reading panel to reveal it in the map. URL hashes support direct links and browser history.
-- On narrow screens, select a node and tap Read to open the page. Close or Escape returns to the map.
-- Nodes and connections cannot be deleted, added, or reconnected by visitors. Rearrangements last for the current visit.
-- Accent offers three local color presets. The Figma orange is the default.
+## Git
 
-Writing 01–04 and Gallery 01–08 are title-only placeholders matching the counts in the design. LinkedIn is also a placeholder page until a verified profile URL is provided. The repeated project thumbnail is the original asset from Figma. No biography, résumé, or project descriptions have been added.
-
-## Version control
-
-Use Git for changes and keep `package-lock.json` committed. The implementation is on `codex/portfolio-shell`. Generated builds, dependencies, and local environment files are ignored.
-
-## Updated UI behavior
-
-The full canvas uses `#181500`, zooming dots, `#313131` nodes, 2 px outside outlines, and four orange corner markers on selected content nodes. The reading panel floats over the full-width canvas. Current rules are at the top of `DESIGN_SYSTEM.md`.
-
-Email, LinkedIn, GitHub, Music, Writing, and Photo Gallery never select content. Email copies `botao.lu@outlook.com`; GitHub opens the profile; Writing and Photo Gallery expand/collapse; Music has no audio yet. LinkedIn awaits a profile URL. Email and Music also connect to About Me. These nodes are omitted from the content selector; their existing Markdown placeholders, if any, are unused. Edit `selectable`, `href`, and `email` in `src/graph.ts` to configure behavior. Category collapse preserves the currently selected article.
+The implementation branch is `codex/portfolio-shell`. Commit source changes and `package-lock.json`; dependencies and generated builds are ignored.
