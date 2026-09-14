@@ -1,12 +1,25 @@
 # Portfolio design system
 
-Version: 0.1 — design analysis and proposed implementation specification
+Version: 0.4 — current UI rules and original design analysis
 Reviewed: 14 September 2026
 Source: [Figma — homepage (default), node 1540:1871](https://www.figma.com/design/VdBbHsw55r7PefmZUsBnaq/portfolio?node-id=1540-1871)
 
+## Current UI rules — latest Figma revision
+
+These rules supersede conflicting details in the historical analysis below.
+
+- Canvas stays `#181500`, full-width under the floating panel, with dots that scale and move with the viewport.
+- Node surface: `#313131`; hover surface: `#3B3B3B` (slightly lighter). Hover does not add a border. Content selection uses only a 2 px accent outside outline. No corner squares, halo, or collapse controls.
+- About Me uses the regular 16/24 label style. Panel corners are 4 px, matching the updated frame.
+- Top-left and bottom-left controls: 1 px `#24221A` outline, `#181500` surface, muted `#858585` labels/icons. Accent label is 14 px; icons remain 16 × 16 px. Other node outlines/connectors remain 2 px.
+- Writing is now “How I create this page?” and opens `content/writing.md`. Photo Gallery opens `content/gallery.md`. Neither has child nodes or collapse behavior. Former child Markdown files are retained but unused.
+- All content nodes open their page directly. Resume opens the Google Docs destination supplied in Figma; LinkedIn opens the supplied profile. External links and Email/Music leave the content selection unchanged. GitHub is removed from the visible map, matching Figma.
+- Music remains an empty draggable component, using the supplied play-shaped icon without pretending playback works. Its connection exits the bottom of About Me and enters the top of Music. Email is aligned with the left branch and uses right-to-left horizontal-facing endpoints for a smooth curve.
+- Email copies `botao.lu@outlook.com`. Existing locally edited content is preserved.
+
 ## Scope and evidence
 
-This document covers the linked desktop frame, its extracted design context, screenshot, and returned variables. It does not claim to audit every page or component in the Figma file. No website code or Figma changes have been made.
+This document covers the linked desktop frame, its extracted design context, screenshot, and returned variables. It does not claim to audit every page or component in the Figma file. The initial analysis preceded implementation; the local website shell now follows it. The Figma file has not been changed.
 
 - **Observed** means present in the linked frame or returned design properties.
 - **Proposed** means a recommended rule that fills a gap or resolves an implementation issue. These values are not existing Figma tokens.
@@ -240,3 +253,24 @@ Start with Markdown plus front-matter parsing. Add MDX only if the writing needs
 ## Remaining design choices
 
 These do not block this specification: whether the Accent control is interactive; actual Writing/Gallery content; preferred project-detail compositions; and whether visitor positions should persist across visits. Keep the documented defaults until these choices are refined.
+
+## Initial implementation — 14 September 2026
+
+- Implemented React + Vite + React Flow, plain CSS tokens, locally bundled Inclusive Sans, and Markdown rendering. No server, CMS, router, or UI component framework was added.
+- Per the latest request, all 21 destinations contain only placeholder headings. Writing and Gallery include 4 and 8 mock child destinations to exercise the authored counts. LinkedIn remains a local placeholder until a real destination is supplied.
+- Markdown uses a single H1 for its title, with no front-matter parser needed at this stage. Navigation metadata lives in `src/graph.ts`.
+- Accent switches between orange, blue, and lime for the current visit. Default selection remains orange.
+- The bounded world uses x=-1300…2700 and y=-800…2200, with zoom 0.25–1.8 so the complete graph can fit in narrow viewports. Node labels and controls can be enlarged with zoom.
+- The floating panel becomes a native modal reading sheet below 768 px. Desktop has a keyboard-accessible “Read selected content” shortcut; all destinations are also available in the panel selector.
+- Thumbnail and matching interface icons are the original exported Figma assets, saved locally. Panel images and biography are intentionally omitted under the title-only requirement.
+- Visit-specific node positions and collapse state remain in memory. URL fragments retain selected-page navigation and browser history.
+
+## First project logo interaction
+
+The AI Workflow node uses `src/WaveformLogo.tsx`, adapted from the owner's Framer animation. The original waveform geometry, scanner endpoints (8 to 86), reveal travel (77 units), and cubic-bezier easing are preserved. A 500 ms CSS transition replaces Framer Motion and reverses smoothly on pointer leave or keyboard blur. Hovering or keyboard-focusing the whole project button triggers the scan; merely selecting a page does not run a loop. A unique SVG mask makes the background transparent over both card fills. The accent uses the shared CSS token. Reduced-motion users see the static starting frame. The second and third logos are now animated as described below.
+
+## Second and third project logo interactions
+
+- `ScaleLogo.tsx` adapts the supplied interface-scale geometry: three overlapping frames, three indicators, and six changing line lengths. CSS transitions interpolate the supplied endpoints over 400 ms with cubic-bezier(.5, 0, .5, 1). Frame fills match the card surface on hover.
+- `SystemLogo.tsx` preserves the supplied polar diagram geometry, piecewise ring rotation, elliptical marker path, and easing functions. A small requestAnimationFrame loop updates only SVG attributes, with a 500 ms full traversal and distance-scaled reversal. The loop stops at rest and is cancelled on unmount.
+- Both activate on whole-card hover or keyboard focus, reverse on leave/blur, use the shared accent, and remain static with reduced motion. Neither needs Framer runtime or property controls.
